@@ -1,0 +1,11 @@
+{
+  "name": "hardhat-project",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "hardhat": "^2.14.1",
+    "solidity-coverage": "^0.8.2"
+  },
+  "scripts": {
+    "coverage": "hardhat coverage"
+  }
+}
