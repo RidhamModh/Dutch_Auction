@@ -26,28 +26,35 @@ contract BasicDutchAuction {
 
     function placeBid() public payable {
         require(block.number >= startingBlock && block.number <= endingBlock, "Auction is not currently open.");
-        require(msg.value >= reservePrice, "Bid amount is less than the minimum amount seller is willing to accept");
+        // require(msg.value >= reservePrice, "Bid amount is less than the minimum amount seller is willing to accept");
 
         uint256 currentPrice = initialPrice - ((block.number - startingBlock) * offerPriceDecrement);
 
         if (msg.value > currentPrice) {
             // Refund previous highest bidder if any
-            if (highestBidder != address(0)) {
-                (bool refundedPreviousBidder, ) = payable(highestBidder).call{value: highestBid}("");
-                require(refundedPreviousBidder, "Failed to refund the previous highest bidder");
-            }
 
+            // (bool refundedPreviousBidder, ) = payable(highestBidder).call{value: highestBid}("");
+            // require(refundedPreviousBidder, "Failed to refund the previous highest bidder");
+            
             highestBidder = msg.sender;
             highestBid = msg.value;
             auctionEnded = true;
 
-            (bool transferredBiddingAmount, ) = seller.call{value: highestBid, gas: 230000}("");
-            require(transferredBiddingAmount, "The transfer to the seller has failed");
-        } else {
-            // Refund the bid amount immediately
-            uint256 refundAmount = msg.value;
-            (bool refunded, ) = msg.sender.call{value: refundAmount}("");
-            require(refunded, "Failed to refund the bid amount");
-        }
+            seller.transfer(highestBid);
+
+
+            // (bool transferredBiddingAmount, ) = seller.call{value: highestBid}("");
+            // require(transferredBiddingAmount, "The transfer to the seller has failed");
+        }   
+        else {
+        // Revert the transaction
+            revert("Bid amount is not higher than current price");
+        } 
+        // } else {
+        //     // Refund the bid amount immediately
+        //     uint256 refundAmount = msg.value;
+        //     (bool refunded, ) = msg.sender.call{value: refundAmount}("");
+        //     require(refunded, "Failed to refund the bid amount");
+        // }
     }
 }
