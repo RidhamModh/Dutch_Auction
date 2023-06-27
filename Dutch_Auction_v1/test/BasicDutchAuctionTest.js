@@ -1,5 +1,11 @@
+import { ethers } from "hardhat";
+
 const { expect, assert } = require("chai");
-const { loadFixture, mine } = require("@nomicfoundation/hardhat-network-helpers");
+const { mine } = require("@nomicfoundation/hardhat-network-helpers");
+
+const _reservePrice = 100;
+const _numBlocksAuctionOpen = 50;
+const _offerPriceDecrement = 1;
 
 describe("BasicDutchAuction", function () {
   let basicDutchAuction;
@@ -8,7 +14,7 @@ describe("BasicDutchAuction", function () {
 
   beforeEach(async function () {
     const BasicDutchAuction = await ethers.getContractFactory("BasicDutchAuction");
-    basicDutchAuction = await BasicDutchAuction.deploy();
+    basicDutchAuction = await BasicDutchAuction.deploy(_reservePrice, _numBlocksAuctionOpen, _offerPriceDecrement);
     await basicDutchAuction.deployed();
 
     [seller, bidder] = await ethers.getSigners();
@@ -26,6 +32,8 @@ describe("BasicDutchAuction", function () {
     expect(await ethers.provider.getBalance(seller.address)).to.equal(initialBalanceSeller.add(bidAmount));
   });
 
+
+
   it("should revert the bid when bid is not higher than current price", async function () {
     const reservePrice = await basicDutchAuction.reservePrice();
     const initialPrice = await basicDutchAuction.initialPrice();
@@ -36,31 +44,8 @@ describe("BasicDutchAuction", function () {
       .to.be.revertedWith("Bid amount is not higher than current price");
   });
   
-  
-  
-  
-  
-  
 
-  
-  
-  // it("should revert the bid when the auction is not currently open", async function () {
-  //   const startingBlock = await basicDutchAuction.startingBlock();
-  //   const endingBlock = await basicDutchAuction.endingBlock();
-  
-  //   // Move the current block number to a block after the auction has ended
-  //   await ethers.provider.send("evm_mine", [endingBlock.toNumber() + 1]);
-  
-  //   const reservePrice = await basicDutchAuction.reservePrice();
-  //   const bidAmount = reservePrice.add(ethers.utils.parseEther("1"));
-  
-  //   await expect(basicDutchAuction.connect(bidder).placeBid({ value: bidAmount }))
-  //     .to.be.revertedWith("Auction is not currently open.");
-  
-  //   const refundAmount = await ethers.provider.getBalance(bidder.address);
-  //   expect(refundAmount).to.equal(bidAmount, "Bid amount was not refunded correctly");
-  // });
-  
+
   //UPDATED
   it("should revert the bid when the auction is not currently open", async function () {
     await mine(50);

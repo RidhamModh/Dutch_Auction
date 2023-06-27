@@ -4,20 +4,23 @@ pragma solidity >=0.7.0 <0.9.0;
 contract BasicDutchAuction {
     address payable public seller;
 
-    uint256 public immutable reservePrice = 1 ether;
-    uint256 public immutable numBlocksAuctionOpen = 30;
-    uint256 public immutable offerPriceDecrement = 0.01 ether;
+    uint public reservePrice;
+    uint public  numBlocksAuctionOpen;
+    uint public  offerPriceDecrement;
 
-    uint256 public initialPrice;
-    uint256 public immutable startingBlock;
-    uint256 public immutable endingBlock;
+    uint public initialPrice;
+    uint public  startingBlock;
+    uint public  endingBlock;
 
     bool public auctionEnded = false;
     address public highestBidder = address(0);
 
-    uint256 public highestBid = 0;
+    uint public highestBid = 0;
 
-    constructor() {
+    constructor(uint _reservePrice, uint _numBlocksAuctionOpen, uint _offerPriceDecrement) {
+        reservePrice = _reservePrice;
+        numBlocksAuctionOpen = _numBlocksAuctionOpen;
+        offerPriceDecrement = _offerPriceDecrement;
         seller = payable(msg.sender);
         initialPrice = reservePrice + numBlocksAuctionOpen * offerPriceDecrement;
         startingBlock = block.number;
@@ -28,7 +31,7 @@ contract BasicDutchAuction {
         require(block.number >= startingBlock && block.number <= endingBlock, "Auction is not currently open.");
         // require(msg.value >= reservePrice, "Bid amount is less than the minimum amount seller is willing to accept");
 
-        uint256 currentPrice = initialPrice - ((block.number - startingBlock) * offerPriceDecrement);
+        uint currentPrice = initialPrice - ((block.number - startingBlock) * offerPriceDecrement);
 
         if (msg.value > currentPrice) {
             // Refund previous highest bidder if any
